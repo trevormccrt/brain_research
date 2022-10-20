@@ -14,8 +14,8 @@ biases = np.random.uniform(-100, 100, network_units+1)
 init_state = [0, 0]
 
 cost_weights = np.ones(network_units)
-target_x_value = 1.3
-target_y_value = 3.1
+target_x_value = 1.5
+target_y_value = 2
 ground_truths = [target_x_value, target_y_value]
 
 
@@ -24,11 +24,11 @@ t_ev = 20
 all_free_end_points = []
 final_weights = []
 final_biases = []
-iterations = 1000
+iterations = 400
 beta_vals =  [0.5]
 for beta in beta_vals:
     this_end_points = []
-    eta = beta
+    eta = 0.5 * beta
     update_weights = weights
     update_biases = biases
     for i in range(iterations):
@@ -46,9 +46,9 @@ for beta, traj in zip(beta_vals, all_free_end_points):
     traj = np.transpose(traj)
     axs[0].plot(traj[0, :])
     axs[1].plot(traj[1, :], label="Learned, β={}".format(beta))
-axs[1].set_xlabel("# of Instruction Cycles")
-axs[0].set_ylabel("Free Evolution Steady x Value")
-axs[1].set_ylabel("Free Evolution Steady y Value")
+axs[1].set_xlabel("Iterations")
+axs[0].set_ylabel("Steady x Value")
+axs[1].set_ylabel("Steady y Value")
 axs[0].plot([0, iterations], [target_x_value, target_x_value], linestyle="--", color="black", label="Target")
 axs[1].plot([0, iterations], [target_y_value, target_y_value], linestyle="--", color="black", label="Target")
 axs[1].legend()
@@ -74,8 +74,8 @@ axs2[0].plot(xlims, [target_y_value, target_y_value], linestyle="--", color="bla
 axs2[1].plot([target_x_value, target_x_value], ylims, linestyle="--", color="black")
 axs2[1].plot(xlims, [target_y_value, target_y_value], linestyle="--", color="black", label="target")
 axs2[1].legend()
-axs2[0].set_title("Before Instruction")
-axs2[1].set_title("After Instruction")
+axs2[0].set_title("Initial Phase Portrait")
+axs2[1].set_title("Final Phase Portrait")
 
 plt.show()
 print("")
