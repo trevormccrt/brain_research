@@ -69,3 +69,4 @@ def test_origin_destabilization():
         loss.backward()
         opt.step()
     assert loss < -0.5
+
