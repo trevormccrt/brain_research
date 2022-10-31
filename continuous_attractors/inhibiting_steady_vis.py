@@ -22,7 +22,7 @@ kernel_axs[1].plot(vals)
 kernel_axs[2].imshow(kernel_mat)
 
 init_state = np.random.uniform(-0.1, 0.1, N)
-soln = integrate.solve_ivp(lambda _, y: ring_attractor.dynamics(y, kernel, np.zeros(N), nonlinearities.sigmoid), [0, 20], init_state, vectorized=True)
+soln = integrate.solve_ivp(lambda _, y: ring_attractor.dynamics(y, kernel, np.zeros(N), nonlinearities.sigmoid), [0, 20], init_state, cmap ="hsv", vectorized=True)
 
 fig, axs = plt.subplots()
 axs.imshow(soln.y, aspect="auto")

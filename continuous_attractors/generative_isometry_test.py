@@ -23,3 +23,13 @@ def test_angle_metric():
     angle_dist = generative_isometry_util.angle_metric_1d(torch.from_numpy(angles)).detach().numpy()
     point_dist = generative_isometry_util.point_metric(torch.from_numpy(points)).detach().numpy()
     np.testing.assert_allclose(angle_dist, point_dist)
+
+
+def test_linear_angle_metric():
+    angles = np.random.uniform(-np.pi, np.pi, (1, 10))
+    x_vals = np.cos(angles)
+    y_vals = np.sin(angles)
+    points = np.transpose(np.stack([x_vals, y_vals]), [1, 2, 0])
+    angle_dist = generative_isometry_util.linear_angle_metric(torch.from_numpy(angles)).detach().numpy()
+    point_dist = generative_isometry_util.linear_point_metric(torch.from_numpy(points)).detach().numpy()
+    np.testing.assert_allclose(angle_dist, point_dist)
