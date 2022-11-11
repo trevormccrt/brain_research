@@ -6,9 +6,9 @@ import os
 from scipy import integrate, linalg as sclinalg
 
 from continuous_attractors import ring_attractor
-import nonlinearities
+from ctep import nonlinearities
 
-N = 2 ** 10
+N = 2 ** 7
 n_samples = 1000
 
 init_conds = np.random.uniform(-1, 1, (n_samples, N))

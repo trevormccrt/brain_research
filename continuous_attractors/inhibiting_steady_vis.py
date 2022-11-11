@@ -3,7 +3,7 @@ import numpy as np
 from scipy import integrate, linalg as sclinalg
 
 from continuous_attractors import ring_attractor
-import nonlinearities
+import ctep import nonlinearities
 
 w_0 = 1
 w_1 = 1
