@@ -9,7 +9,7 @@ class SpectralNNLinearOperator(splinalg.LinearOperator):
         self.n_neurons = n_neurons
         self.n_grid = n_grid
         shape = n_neurons * n_grid
-        super().__init__(None, (shape, shape))
+        super().__init__(float, (shape, shape))
 
     def gridify_vec(self, x):
         return np.reshape(x, (self.n_grid, self.n_neurons))
@@ -51,10 +51,47 @@ class ElementWiseMultiplication(SpectralNNLinearOperator):
         return self.flat_to_mul * x
 
 
-def newton_iteration(u_prev, w_op: SpectralNNLinearOperator, b, nonlin, nonlin_deriv, diff_op: SpectralNNLinearOperator, init_cond):
+class BoundaryBordering(SpectralNNLinearOperator):
+    def __init__(self, n_neurons, n_grid, boundary, boundary_value, op_to_border):
+        super().__init__(n_neurons, n_grid)
+        self.boundary = boundary
+        self.boundary_value = boundary_value
+        self.op_to_border = op_to_border
+
+    def _matvec(self, x):
+        x_grid_orig = self.gridify_vec(x)
+        x_forward = self.op_to_border.dot(x)
+        gridded_x = self.gridify_vec(x_forward)
+        gridded_x[self.boundary, :] = self.boundary_value * x_grid_orig[self.boundary, :]
+        return self.flatten_vec(gridded_x)
+
+
+def newton_iteration(u_prev, w_op: SpectralNNLinearOperator, b, nonlin, nonlin_deriv, diff_op: SpectralNNLinearOperator):
     u_prev_grid = diff_op.gridify_vec(u_prev)
+    n_grid = u_prev_grid.shape[0]
+    n_neurons = u_prev_grid.shape[1]
     deriv_activ_prev = nonlin_deriv(w_op.gridded_matvec(u_prev_grid) + b)
     el_op = ElementWiseMultiplication(deriv_activ_prev)
-    lhs_op = diff_op + sparse.identity(w_op.shape[0]) - (el_op * w_op)
-    a = lhs_op[:-1, :-1]
-    rhs = -diff_op.dot(u_prev) - u_prev + nonlin(w_op.flatten_vec(w_op.gridded_matvec(u_prev_grid) + b))
+    spatial_id = SpaceMatmul(n_grid, np.eye(n_neurons))
+    lhs_op = diff_op + spatial_id - (el_op.dot(w_op))
+    lhs_with_boundaries = BoundaryBordering(n_neurons, n_grid, -1, 1, lhs_op)
+    a = diff_op.dot(u_prev)
+    rhs = -a - u_prev + nonlin(w_op.flatten_vec(w_op.gridded_matvec(u_prev_grid) + b))
+    soln = splinalg.cgs(lhs_with_boundaries, rhs)
+    if soln[1] > 0:
+        raise ValueError("CGS Failed to Converge")
+    return soln[0]
+
+
+def iterate(init_u, w_op, b, nonlin, nonlin_deriv, diff_op, tol=1e-5, max_iter=100000):
+    this_u = init_u
+    all_resids = []
+    for i in range(max_iter):
+        this_v = newton_iteration(this_u, w_op, b, nonlin, nonlin_deriv, diff_op)
+        resid = np.max(np.abs(this_v)) / np.max(np.abs(this_u))
+        all_resids.append(resid)
+        this_u = this_u + this_v
+        print(resid)
+        if resid < tol:
+            break
+    return this_u, all_resids

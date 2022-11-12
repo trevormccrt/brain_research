@@ -12,17 +12,19 @@ def solve_newton_update(u_prev, w, b, nonlin, nonlin_deriv, differentiation_matr
     lhs[-1, -1] = 1
     rhs = - differentiation_matrix.dot(u_prev) - u_prev  + nonlin(w * u_prev + b)
     rhs[-1] = init_cond
+    a = lhs[:, -1]
     return np.linalg.solve(lhs, rhs)
 
 
-N = 2**10
-final_time = 100000
+N = 128
+final_time = 100
 grid = chebychev.extrema_grid(N)
 d_mat = 2/final_time * colocation_core.cheb_extrema_diff_mat(grid)
 w = -1
 b = 1
 tol = 1e-5
 
+np.random.seed(1)
 init_u = np.random.uniform(-1, 1, len(grid))
 
 this_u = init_u
