@@ -62,7 +62,7 @@ def test_newton():
     diff_op =  nn_newtons.TimeMatmul(n_neurons, diff_mat)
     weight_mat = -1 * np.ones((n_neurons, n_neurons))
     weight_op = nn_newtons.SpaceMatmul(N, weight_mat)
-    soln, resids = nn_newtons.iterate(init_u, weight_op, np.ones(n_neurons), nonlinearities.sigmoid, nonlinearities.deriv_sigmoid, diff_op, tol=1e-3)
+    soln, resids = nn_newtons.iterate(init_u, weight_op, np.ones(n_neurons), nonlinearities.sigmoid, nonlinearities.deriv_sigmoid, diff_op, tol=1e-2)
     print(resids)
 
 test_newton()
